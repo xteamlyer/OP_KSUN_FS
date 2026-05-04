@@ -1,4 +1,4 @@
-name: Mirror static toolchains to GitHub Release
+name: ToolChains Generator
 
 permissions:
   contents: write
@@ -31,7 +31,7 @@ jobs:
             git push origin "$TAG_NAME"
             
             echo "Release not found. Creating..."
-            gh release create "$TAG_NAME" --title "Toolchains Mirror Cache" --notes "Deduplicated Toolchains for Kernel Build" --repo "$TARGET_REPO"
+            gh release create "$TAG_NAME" --title "SakFi Toolchains Mirror Cache" --notes "Dedicated Toolchains for SakFi Kernel Builds" --repo "$TARGET_REPO"
           else
             echo "Release 'toolchain-cache' already exists. Skipping creation."
           fi
