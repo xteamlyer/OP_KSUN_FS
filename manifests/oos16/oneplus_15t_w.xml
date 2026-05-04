@@ -2,6 +2,8 @@
 <manifest>
   <remote fetch="https://git.codelinaro.org/clo/la" name="clo-la"/>
   <remote fetch="https://github.com/OnePlusOSS" name="origin"/>
+  <remote fetch="https://github.com/WildKernels" name="wild"/>
+  <project remote="wild" name="AnyKernel3" path="AnyKernel3" revision="d1ebdc2002c557ceff9939afc3098eb88916f464"/>
   
   <remote fetch="https://android.googlesource.com" name="aosp"/>
   <default revision="main-kernel-2025" remote="aosp" sync-j="4" />
@@ -18,4 +20,5 @@
   </project>
   <project remote="aosp" name="platform/prebuilts/clang/host/linux-x86" path="kernel_platform/prebuilts/clang/host/linux-x86" clone-depth="1" groups="ddk" />
   <project remote="aosp" name="platform/prebuilts/rust" path="kernel_platform/prebuilts/rust" clone-depth="1" groups="ddk" />
+  <project remote="aosp" name="platform/prebuilts/clang-tools" path="kernel_platform/prebuilts/clang-tools" clone-depth="1" groups="ddk" />
 </manifest>
