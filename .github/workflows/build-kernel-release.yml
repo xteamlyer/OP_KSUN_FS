@@ -789,7 +789,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.set-op-model.result == 'success' &&
-      fromJSON(needs.set-op-model.outputs.matrix_oos16).include != []
+      fromJSON(needs.set-op-model.outputs.matrix_oos16).include[0] != null
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -816,7 +816,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.set-op-model.result == 'success' &&
-      fromJSON(needs.set-op-model.outputs.matrix_oos15).include != []
+      fromJSON(needs.set-op-model.outputs.matrix_oos15).include[0] != null
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -843,7 +843,7 @@ jobs:
     if: |
       !cancelled() &&
       needs.set-op-model.result == 'success' &&
-      fromJSON(needs.set-op-model.outputs.matrix_oos14).include != []
+      fromJSON(needs.set-op-model.outputs.matrix_oos14).include[0] != null
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
