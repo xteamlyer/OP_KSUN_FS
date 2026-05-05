@@ -171,8 +171,9 @@ runs:
           local attempt=1
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt of $max_attempts: Updating and installing dependencies..."
-            if sudo DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Retries=3 && \
-               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -o Acquire::Retries=3 dos2unix libelf-dev bc cpio; then
+            if sudo env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Retries=3 && \
+               sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -o Acquire::Retries=3 \
+               dos2unix libelf-dev libdw-dev bc cpio; then
               echo "✅ Dependencies installed successfully"
               return 0
             fi
