@@ -164,8 +164,27 @@ runs:
       run: |
         set -euo pipefail
         echo "::group::Install system dependencies"
-        sudo apt-get update
-        sudo apt-get install -y dos2unix libelf-dev bc cpio
+        
+        # Robust apt-get with retries to prevent hanging on slow mirrors
+        install_with_retry() {
+          local max_attempts=3
+          local attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts: Updating and installing dependencies..."
+            if sudo DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Retries=3 && \
+               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -o Acquire::Retries=3 dos2unix libelf-dev bc cpio; then
+              echo "✅ Dependencies installed successfully"
+              return 0
+            fi
+            echo "⚠️ Attempt $attempt failed. Retrying in 5 seconds..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+          echo "::error::Failed to install dependencies after $max_attempts attempts"
+          return 1
+        }
+        
+        install_with_retry
         echo "::endgroup::"
 
     - name: Validate Inputs
