@@ -165,20 +165,35 @@ runs:
         set -euo pipefail
         echo "::group::Install system dependencies"
         
-        # Robust apt-get with retries to prevent hanging on slow mirrors
+        PACKAGES="dos2unix libelf-dev libdw-dev bc dwarves cpio pigz aria2"
+        
         install_with_retry() {
-          local max_attempts=3
+          local max_attempts=5
           local attempt=1
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt of $max_attempts: Updating and installing dependencies..."
-            if sudo env DEBIAN_FRONTEND=noninteractive apt-get update -y -o Acquire::Retries=3 && \
-               sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -o Acquire::Retries=3 \
-               dos2unix libelf-dev libdw-dev bc cpio; then
+            
+            # Clear apt cache on retry to fix potential corruption
+            if [ $attempt -gt 1 ]; then
+              sudo apt-get clean
+              sudo rm -rf /var/lib/apt/lists/*
+              # On retries, switch to a reliable mirror
+              echo "Switching to archive.ubuntu.com mirror..."
+              sudo sed -i 's|http://azure.archive.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list 2>/dev/null || true
+              sudo sed -i 's|http://.*archive.ubuntu.com|http://archive.ubuntu.com|g' /etc/apt/sources.list 2>/dev/null || true
+            fi
+
+            # Use timeout to prevent hanging on slow mirrors (3 min update, 5 min install)
+            if sudo env DEBIAN_FRONTEND=noninteractive timeout 180 apt-get update -y -o Acquire::Retries=5 -o Acquire::http::Timeout=30 && \
+               sudo env DEBIAN_FRONTEND=noninteractive timeout 300 apt-get install -y -o Acquire::Retries=5 -o Acquire::http::Timeout=30 \
+               $PACKAGES; then
               echo "✅ Dependencies installed successfully"
               return 0
             fi
-            echo "⚠️ Attempt $attempt failed. Retrying in 5 seconds..."
-            sleep 5
+            
+            local wait_time=$((attempt * 15))
+            echo "⚠️ Attempt $attempt failed. Retrying in $wait_time seconds..."
+            sleep $wait_time
             attempt=$((attempt + 1))
           done
           echo "::error::Failed to install dependencies after $max_attempts attempts"
@@ -186,6 +201,17 @@ runs:
         }
         
         install_with_retry
+        echo "::endgroup::"
+
+        # Verify critical tools are available
+        echo "::group::Verify installed tools"
+        for tool in pahole bc dos2unix; do
+          if command -v "$tool" >/dev/null 2>&1; then
+            echo "  ✅ $tool: $(command -v $tool)"
+          else
+            echo "  ⚠️ $tool not found in PATH"
+          fi
+        done
         echo "::endgroup::"
 
     - name: Validate Inputs
@@ -1747,6 +1773,18 @@ runs:
         export ARCH=arm64 SUBARCH=arm64
         export CROSS_COMPILE=aarch64-linux-gnu-
         export PAHOLE="$KERNEL_PLATFORM_FOLDER/prebuilts/kernel-build-tools/linux-x86/bin/pahole"
+        
+        # Fallback for pahole if prebuilt is missing (common in some OOS14 branches)
+        if [ ! -x "$PAHOLE" ]; then
+          echo "⚠️ Prebuilt pahole not found at $PAHOLE, trying system pahole..."
+          if command -v pahole >/dev/null 2>&1; then
+            export PAHOLE=$(command -v pahole)
+            echo "✅ Using system pahole: $PAHOLE"
+          else
+            echo "❌ system pahole not found!"
+          fi
+        fi
+
         export LD=ld.lld HOSTLD=ld.lld AR=llvm-ar NM=llvm-nm 
         export OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip
         
