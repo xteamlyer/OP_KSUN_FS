@@ -42,7 +42,8 @@ runs:
           gh release create "$TAG_NAME" \
             --title "Cache Bucket: $BUCKET" \
             --notes "Automated cache storage for $BUCKET. Do not delete." \
-            --target "main"
+            --target "main" \
+            --prerelease
         fi
         
         # 2. Archive directory
