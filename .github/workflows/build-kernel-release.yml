@@ -990,7 +990,7 @@ jobs:
               susfs_ver="none"
             fi
             full_model="${model}_${os_version}"
-            device_info["$full_model"]="$model|$os_ver|$kernel_ver|$ksu_type|$ksu_ver|$susfs_ver"
+            device_info["$full_model"]="$model|$os_version|$kernel_version|$ksu_type|$ksu_ver|$susfs_ver"
           done
           
           ksu_type="${{ fromJSON(needs.set-op-model.outputs.ksu_options_normalized)[0].type }}"
