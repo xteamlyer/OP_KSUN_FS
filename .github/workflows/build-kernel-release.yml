@@ -892,7 +892,7 @@ jobs:
     needs: [set-op-model, build-oos16, build-oos15, build-oos14]
     runs-on: ubuntu-latest
     if: ${{ always() && inputs.make_release && !cancelled() && (inputs.workflow_mode == 'Release Only' || !failure()) }}
-    environment: ${{ (github.ref_name == 'main' || github.ref_name == 'Beta-2') && 'Production-Release' || '' }}
+    environment: ${{ (github.ref_name == 'main' || github.ref_name == 'Beta-2' || github.ref_name == 'testing') && 'Production-Release' || '' }}
     env:
       REPO_OWNER: ${{ github.repository_owner }}
       REPO_NAME: ${{ github.event.repository.name }}
