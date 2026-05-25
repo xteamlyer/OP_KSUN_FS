@@ -33,7 +33,7 @@ jobs:
           INPUT_BRANCH="${{ github.event.inputs.target_branch || inputs.target_branch }}"
           
           if [ "${{ github.event_name }}" == "schedule" ] || [ -z "$INPUT_BRANCH" ]; then
-            echo "branches=[\"main\", \"Testing\", \"Beta-2\"]" >> "$GITHUB_OUTPUT"
+            echo "branches=[\"main\", \"testing\", \"Beta-2\"]" >> "$GITHUB_OUTPUT"
           else
             echo "branches=[\"$INPUT_BRANCH\"]" >> "$GITHUB_OUTPUT"
           fi
@@ -94,6 +94,11 @@ jobs:
           for branch in $(echo "$BRANCHES_JSON" | jq -r '.[]'); do
             echo "📥 Fetching configs from branch: $branch"
             mkdir -p "branch_$branch"
+            
+            if ! git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+              echo "⚠️ Branch $branch does not exist on remote. Skipping..."
+              continue
+            fi
             
             # Use git checkout-index or sparse-checkout to get just the configs folder from the branch
             # But for simplicity, we'll just use a shallow checkout of the branch
