@@ -1118,7 +1118,7 @@ runs:
             echo "Stubbing LSM hooks in KernelSU-Next's selinux_hide.c..."
             cd "$KSUN_FOLDER"
             if [ -f "kernel/feature/selinux_hide.c" ]; then
-              sed -i '1i #ifdef CONFIG_KSU_SUSFS\n#define ksu_lsm_hook(x) (0)\n#define ksu_lsm_unhook(x) do {} while(0)\n#endif' kernel/feature/selinux_hide.c
+              echo -e '\n#ifdef CONFIG_KSU_SUSFS\nint ksu_lsm_hook(struct ksu_lsm_hook *hook) {\n\treturn 0;\n}\nvoid ksu_lsm_unhook(struct ksu_lsm_hook *hook) {\n}\n#endif' >> kernel/feature/selinux_hide.c
             fi
             cd "$KERNEL_PLATFORM_FOLDER"
           fi
