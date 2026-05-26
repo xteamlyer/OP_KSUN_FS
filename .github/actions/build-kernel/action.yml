@@ -1211,6 +1211,15 @@ runs:
             if [ "${{ inputs.ksu_type }}" = "KSUN" ]; then
               cd "$KSUN_FOLDER"
               patch -p1 --forward < "$SUSFS_FOLDER/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" || true
+              
+              # Restore Kbuild because 10_enable_susfs_for_ksu.patch (made for KSU) deletes crucial KSUN hooking mechanisms
+              git checkout kernel/Kbuild
+              
+              # Fix static fake_state which causes a linker error when linked against vmlinux
+              if [ -f "kernel/feature/selinux_hide.c" ]; then
+                sed -i 's/static struct selinux_state fake_state;/struct selinux_state fake_state;/' kernel/feature/selinux_hide.c
+              fi
+
               for file in $(find ./kernel -maxdepth 2 -name "*.rej" -exec basename {} .rej \;); do
                 patch_file="$KERNEL_PATCHES_FOLDER/next/susfs_fix_patches/$susfs_version/fix_$file.patch"
                 if [ -f "$patch_file" ]; then
