@@ -1187,6 +1187,19 @@ runs:
                 echo "Patching Multi-manager sepolicy Support for SusFS kernel!"
                 patch -p1 --forward < "$KERNEL_PATCHES_FOLDER/next/susfs_fix_patches/$susfs_version/multi_sepolicy_fix.patch"
               fi
+              echo "Repairing KSUN missing declarations..."
+              if [ -f "./kernel/core/init.c" ]; then
+                if grep -q "ksu_lsm_hook_init();" "./kernel/core/init.c" && ! grep -q "ksu_lsm_hook_init(void);" "./kernel/core/init.c"; then
+                  sed -i '/#include "ksu.h"/a extern void __init ksu_lsm_hook_init(void);' "./kernel/core/init.c"
+                fi
+                if grep -q "if (ksu_late_loaded)" "./kernel/core/init.c" && ! grep -q "bool ksu_late_loaded;" "./kernel/core/init.c"; then
+                  sed -i '/struct cred \*ksu_cred;/a bool ksu_late_loaded;' "./kernel/core/init.c"
+                fi
+              fi
+              if [ -f "./kernel/hook/syscall_hook.h" ]; then
+                sed -i 's/void ksu_syscall_hook_init(void);/void ksu_syscall_hook_manager_init(void);/g' "./kernel/hook/syscall_hook.h"
+                sed -i 's/void ksu_syscall_hook_exit(void);/void ksu_syscall_hook_manager_exit(void);/g' "./kernel/hook/syscall_hook.h"
+              fi
             else
               cd "$KSU_FOLDER"
               patch -p1 --forward < "$SUSFS_FOLDER/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch" || true
@@ -1216,6 +1229,19 @@ runs:
               if [ "$KSUVER" -ge 33068 ] && [ "$KSUVER" -lt 33070 ]; then
                 echo "Patching Multi-manager sepolicy Support for SusFS kernel!"
                 patch -p1 --forward < "$KERNEL_PATCHES_FOLDER/next/susfs_fix_patches/$susfs_version/multi_sepolicy_fix.patch"
+              fi
+              echo "Repairing KSUN missing declarations..."
+              if [ -f "./kernel/core/init.c" ]; then
+                if grep -q "ksu_lsm_hook_init();" "./kernel/core/init.c" && ! grep -q "ksu_lsm_hook_init(void);" "./kernel/core/init.c"; then
+                  sed -i '/#include "ksu.h"/a extern void __init ksu_lsm_hook_init(void);' "./kernel/core/init.c"
+                fi
+                if grep -q "if (ksu_late_loaded)" "./kernel/core/init.c" && ! grep -q "bool ksu_late_loaded;" "./kernel/core/init.c"; then
+                  sed -i '/struct cred \*ksu_cred;/a bool ksu_late_loaded;' "./kernel/core/init.c"
+                fi
+              fi
+              if [ -f "./kernel/hook/syscall_hook.h" ]; then
+                sed -i 's/void ksu_syscall_hook_init(void);/void ksu_syscall_hook_manager_init(void);/g' "./kernel/hook/syscall_hook.h"
+                sed -i 's/void ksu_syscall_hook_exit(void);/void ksu_syscall_hook_manager_exit(void);/g' "./kernel/hook/syscall_hook.h"
               fi
             else
               cd "$KSU_FOLDER"
