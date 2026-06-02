@@ -1118,25 +1118,23 @@ runs:
           echo "Patching $filepath..."
           sed -i 's/static bool ksu_selinux_hide_running/bool ksu_selinux_hide_running/g' "$filepath"
           sed -i 's/static struct selinux_state fake_state/struct selinux_state fake_state/g' "$filepath"
-          cat >> "$filepath" << 'EOF'
-
-/* SUSFS & hookless mode symbol stubs defined by SakFi */
-#ifndef STUBS_DEFINED_BY_SAKFI
-#define STUBS_DEFINED_BY_SAKFI
-
-__attribute__((weak)) int ksu_lsm_hook(void *hook) {
-	return 0;
-}
-
-__attribute__((weak)) void ksu_lsm_unhook(void *hook) {
-}
-
-__attribute__((weak)) int ksu_patch_text(void *addr, void *new_addr) {
-	return 0;
-}
-
-#endif
-EOF
+          echo "" >> "$filepath"
+          echo "/* SUSFS & hookless mode symbol stubs defined by SakFi */" >> "$filepath"
+          echo "#ifndef STUBS_DEFINED_BY_SAKFI" >> "$filepath"
+          echo "#define STUBS_DEFINED_BY_SAKFI" >> "$filepath"
+          echo "" >> "$filepath"
+          echo "__attribute__((weak)) int ksu_lsm_hook(void *hook) {" >> "$filepath"
+          echo "  return 0;" >> "$filepath"
+          echo "}" >> "$filepath"
+          echo "" >> "$filepath"
+          echo "__attribute__((weak)) void ksu_lsm_unhook(void *hook) {" >> "$filepath"
+          echo "}" >> "$filepath"
+          echo "" >> "$filepath"
+          echo "__attribute__((weak)) int ksu_patch_text(void *addr, void *new_addr) {" >> "$filepath"
+          echo "  return 0;" >> "$filepath"
+          echo "}" >> "$filepath"
+          echo "" >> "$filepath"
+          echo "#endif" >> "$filepath"
         done
         
         susfs_version=$(grep '#define SUSFS_VERSION' "$COMMON_KERNEL_FOLDER/include/linux/susfs.h" | awk -F'"' '{print $2}')
