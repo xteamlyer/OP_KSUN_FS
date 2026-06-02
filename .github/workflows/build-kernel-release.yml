@@ -96,7 +96,7 @@ on:
         description: 'Enter KernelSU build json'
         required: true
         type: string
-        default: '[{"type":"ksun","hash":"5a4a71874caaad06aa126f761c93391de1d32361"}]'
+        default: '[{"type":"ksun","hash":"dev"}]'
       enable_wireguard:
         description: '🛂 Global Master Switch: Enable WireGuard for all models'
         required: true
