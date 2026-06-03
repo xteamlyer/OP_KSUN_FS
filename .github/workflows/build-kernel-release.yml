@@ -813,7 +813,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos16) }}
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -842,7 +842,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos15) }}
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -871,7 +871,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos14) }}
-    timeout-minutes: 75
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
