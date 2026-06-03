@@ -67,10 +67,9 @@ jobs:
           Device: Any supported OnePlus device (Check GitHub for your device)
 
           Features:
-          - Multiple variants:
-            - KernelSU
+          - Variants:
             - KernelSU-Next
-            - SUSFS (v2.1.0) and non-SUSFS
+            - SUSFS (v2.1.0)
           - Optimized for performance and battery life (LTO, Memory, I/O)
           - Network features (TCP BBR, WireGuard, IP Set, TTL)
           - Advanced features (Droidspaces, NTSync, HMBIRD SCX)
