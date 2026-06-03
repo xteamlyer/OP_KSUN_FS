@@ -33,7 +33,7 @@ jobs:
           INPUT_BRANCH="${{ github.event.inputs.target_branch || inputs.target_branch }}"
           
           if [ "${{ github.event_name }}" == "schedule" ] || [ -z "$INPUT_BRANCH" ]; then
-            echo "branches=[\"main\", \"Testing\", \"Beta-2\"]" >> "$GITHUB_OUTPUT"
+            echo "branches=[\"main\", \"testing\", \"Beta-2\"]" >> "$GITHUB_OUTPUT"
           else
             echo "branches=[\"$INPUT_BRANCH\"]" >> "$GITHUB_OUTPUT"
           fi
@@ -55,6 +55,9 @@ jobs:
           # Check if the release already exists
           TARGET_REPO="${{ github.repository }}"
           TAG_NAME="toolchain-cache"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           if ! git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             echo "Tag not found. Creating backdated tag and release..."
@@ -91,6 +94,11 @@ jobs:
           for branch in $(echo "$BRANCHES_JSON" | jq -r '.[]'); do
             echo "📥 Fetching configs from branch: $branch"
             mkdir -p "branch_$branch"
+            
+            if ! git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+              echo "⚠️ Branch $branch does not exist on remote. Skipping..."
+              continue
+            fi
             
             # Use git checkout-index or sparse-checkout to get just the configs folder from the branch
             # But for simplicity, we'll just use a shallow checkout of the branch
@@ -160,8 +168,8 @@ jobs:
                   root = ET.parse(xml_file).getroot()
                   remotes = {r.get('name'): r.get('fetch').rstrip('/') for r in root.findall('remote')}
                   default = root.find('default')
-                  def_remote = default.get('remote')
-                  def_rev = default.get('revision')
+                  def_remote = default.get('remote') if default is not None else None
+                  def_rev = default.get('revision') if default is not None else None
                   
                   for project in root.findall('project'):
                       name = project.get('name')
@@ -177,6 +185,10 @@ jobs:
                         rev = project.get('revision', def_rev)
                         base_url = remotes.get(remote_name, "").rstrip('/')
                         cache_filename = f"{type_label}-{rev}.tar.gz"
+                        
+                        if not remote_name or not rev:
+                          print(f"⚠️ Skipping toolchain project '{name}' because remote or revision cannot be resolved.")
+                          continue
                         
                         if cache_filename not in unique_toolchains:
                             if "googlesource.com" in base_url:

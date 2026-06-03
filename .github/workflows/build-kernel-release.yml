@@ -96,7 +96,7 @@ on:
         description: 'Enter KernelSU build json'
         required: true
         type: string
-        default: '[{"type":"ksun","hash":"551ad80473f60e052917aec08abf5323b6ab2f7c"}]'
+        default: '[{"type":"ksun","hash":"c2013a15ae1eaca69032fa6016ffefb70adf6146"}]'
       enable_wireguard:
         description: '🛂 Global Master Switch: Enable WireGuard for all models'
         required: true
@@ -156,23 +156,23 @@ on:
       android12-5_10_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android12-5.10'
         type: string
-        default: '674f72b6f683e837d7f557704cabe00a83eeb0b4'      
+        default: 'ce2c2b2dea28c89d33f61af898cc18a93bf65ae9'      
       android13-5_15_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android13-5.15'
         type: string
-        default: 'eaa5d299dd85a4230f936b94dc5dd8303f27130a'      
+        default: '529919fbc9f8aee6ee70eb3a8890ef33af0a109c'      
       android14-6_1_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android14-6.1'
         type: string
-        default: '971cc4e770b7f344a4df35ce92d7a859e6a1e0fd'
+        default: 'd1327b62e0854603cfc26e2226e0a993ec9b0656'
       android15-6_6_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android15-6.6'
         type: string
-        default: '85bcfac5edc8ba7808581e8d0a3ca9c7deca78e4'
+        default: '676d202ed2cc322a2f90bcb2b56bc4f6a864acb8'
       android16-6_12_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android16-6.12'
         type: string
-        default: '5fbf04e8c6c08b8ca759e0ac81bed7d2dc96f7f8'
+        default: 'd20fb81b5f17e66ffeac1321a1257d53e2d16e53'
 
 jobs:
   set-op-model:
@@ -813,7 +813,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos16) }}
-    timeout-minutes: 90
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -842,7 +842,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos15) }}
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -871,7 +871,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.set-op-model.outputs.matrix_oos14) }}
-    timeout-minutes: 75
+    timeout-minutes: 180
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v6
@@ -892,7 +892,7 @@ jobs:
     needs: [set-op-model, build-oos16, build-oos15, build-oos14]
     runs-on: ubuntu-latest
     if: ${{ always() && inputs.make_release && !cancelled() && (inputs.workflow_mode == 'Release Only' || !failure()) }}
-    environment: ${{ (github.ref_name == 'main' || github.ref_name == 'Beta-2') && 'Production-Release' || '' }}
+    environment: ${{ (github.ref_name == 'main' || github.ref_name == 'Beta-2' || github.ref_name == 'testing') && 'Production-Release' || '' }}
     env:
       REPO_OWNER: ${{ github.repository_owner }}
       REPO_NAME: ${{ github.event.repository.name }}
