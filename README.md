@@ -2,7 +2,7 @@
 
 # 🔥 OP_KSUN_FS 🔥
 [![Build Kernel](https://img.shields.io/github/actions/workflow/status/sakfi/OP_KSUN_FS/build-kernel-release.yml?label=Latest%20Release%20status&style=flat-square)](https://github.com/sakfi/OP_KSUN_FS/actions/workflows/build-kernel-release.yml)
-[![GitHub Release](https://badgen.net/github/tag/sakfi/OP_KSUN_FS?label=Latest+Release&color=blue)](https://github.com/sakfi/OP_KSUN_FS/releases/latest)
+[![GitHub Release](https://badgen.net/github/tag/sakfi/OP_KSUN_FS?label=release&color=blue)](https://github.com/sakfi/OP_KSUN_FS/releases/latest)
 [![Forks](https://badgen.net/github/forks/sakfi/OP_KSUN_FS?color=orange)](https://github.com/sakfi/OP_KSUN_FS/network/members)
 [![Stars](https://badgen.net/github/stars/sakfi/OP_KSUN_FS?color=yellow)](https://github.com/sakfi/OP_KSUN_FS/stargazers)
 
@@ -19,7 +19,9 @@
 
 </div>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## ⚠️ Disclaimer
 
@@ -44,7 +46,9 @@ Flashing this kernel will not void your warranty, but there is always a risk of 
 
 </div>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 🚀 What This Does
 
@@ -60,7 +64,9 @@ This repository provides a fully automated GitHub Actions workflow that:
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## ✨ Features
 
@@ -87,7 +93,9 @@ This repository provides a fully automated GitHub Actions workflow that:
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 <details>
 <summary><b>👀 View SUSFS Hide Capabilities</b></summary>
@@ -96,7 +104,9 @@ This repository provides a fully automated GitHub Actions workflow that:
 - ✅ SPOOF_UNAME · SPOOF_CMDLINE · OPEN_REDIRECT · AVC_SPOOF
 </details>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 📱 Supported Devices
 
@@ -116,7 +126,9 @@ All local kernel enhancements are organized under one roof for easier maintenanc
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 🔋 Battery Optimization Suite
 Our unique battery suite targets three critical areas to maximize OnePlus performance:
@@ -127,7 +139,9 @@ Our unique battery suite targets three critical areas to maximize OnePlus perfor
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 📋 Installation Instructions
 
@@ -151,7 +165,9 @@ Our unique battery suite targets three critical areas to maximize OnePlus perfor
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 🌟 Special Thanks
 
@@ -173,7 +189,9 @@ These amazing people help make this project possible! ❤️
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 💬 Support
 
@@ -186,7 +204,9 @@ If you encounter any issues or need help, feel free to:
 
 <br>
 
----
+<div align="center">
+  <img src=".github/workflows/split.gif" alt="Divider" width="100%" height="4px" />
+</div>
 
 ## 📱 Connect With Me
 
