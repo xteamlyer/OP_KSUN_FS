@@ -30,6 +30,7 @@ on:
           - OP-ACE-5-RACE
           - OP-ACE-5-ULTRA
           - OP-ACE-6
+          - OP-ACE-6-ULTRA
           - OP-ACE-6T
           - OP-ACE-RACE
           - OP-NORD-3
