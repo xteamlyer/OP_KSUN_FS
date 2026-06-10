@@ -475,7 +475,7 @@ runs:
 
     - name: Get prebuilt ccache (downloaded once by prepare_ccache)
       if: ${{ inputs.install_ccache_ecs == 'true' }}
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         name: ccache-binary
         path: ccache-dl
