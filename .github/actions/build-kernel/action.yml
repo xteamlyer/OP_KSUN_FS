@@ -46,6 +46,12 @@ inputs:
     description: 'GitHub Token'
     required: true
 
+  enable_wireguard:
+    required: false
+  enable_battery_opt:
+    required: false
+  enable_ntsync:
+    required: false
 outputs:
   kernel_version:
     description: 'Full kernel version string'
@@ -110,7 +116,28 @@ runs:
       run: |
         set -euo pipefail
         echo '${{ inputs.op_config_json }}' > /tmp/config.json
-        jq -r 'to_entries[] | "OP_\(.key | ascii_upcase)=\(.value)"' /tmp/config.json >> "$GITHUB_ENV"
+        if [ "${{ inputs.enable_wireguard }}" == "true" ]; then
+          OP_WIREGUARD="true"
+        else
+          OP_WIREGUARD=$(jq -r '.wireguard // empty' /tmp/config.json)
+        fi
+        
+        if [ "${{ inputs.enable_battery_opt }}" == "true" ]; then
+          OP_BATTERY_OPT="true"
+        else
+          OP_BATTERY_OPT=$(jq -r '.battery_opt // empty' /tmp/config.json)
+        fi
+        
+        if [ "${{ inputs.enable_ntsync }}" == "true" ]; then
+          OP_NTSYNC="true"
+        else
+          OP_NTSYNC=$(jq -r '.ntsync // empty' /tmp/config.json)
+        fi
+
+        jq -r 'to_entries[] | select(.key != "wireguard" and .key != "battery_opt" and .key != "ntsync") | "OP_\(.key | ascii_upcase)=\(.value)"' /tmp/config.json >> "$GITHUB_ENV"
+        [ -n "$OP_WIREGUARD" ] && echo "OP_WIREGUARD=$OP_WIREGUARD" >> "$GITHUB_ENV" || true
+        [ -n "$OP_BATTERY_OPT" ] && echo "OP_BATTERY_OPT=$OP_BATTERY_OPT" >> "$GITHUB_ENV" || true
+        [ -n "$OP_NTSYNC" ] && echo "OP_NTSYNC=$OP_NTSYNC" >> "$GITHUB_ENV" || true
         echo "Parsed config:"
         jq '.' /tmp/config.json
 

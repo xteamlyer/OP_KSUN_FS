@@ -7,33 +7,112 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      make_release:
-        description: 'Do you want to create a release?'
-        required: true
-        type: boolean
-        default: false
+      custom_release_tag:
+        description: 'Provide a custom release tag (e.g., v2.0.0). Leave empty to auto-generate.'
+        required: false
+        type: string
+        default: ''
       op_model:
-        description: 'Select the OnePlus kernels to build'
+        description: 'Select the OnePlus Devices to build'
         required: true
         type: choice
         options:
-          - A14+15+16
-          - A15+16
-          - A14+15
-          - A16
-          - A15
-          - A14
-          - android16-6.12
-          - android15-6.6
-          - android14-6.1
-          - android13-5.15
+          - All
+          - OP-ACE
+          - OP-ACE-2
+          - OP-ACE-2-PRO
+          - OP-ACE-2V
+          - OP-ACE-3
+          - OP-ACE-3-PRO
+          - OP-ACE-3V
+          - OP-ACE-5
+          - OP-ACE-5-PRO
+          - OP-ACE-5-RACE
+          - OP-ACE-5-ULTRA
+          - OP-ACE-6
+          - OP-ACE-6-ULTRA
+          - OP-ACE-6T
+          - OP-ACE-RACE
+          - OP-NORD-3
+          - OP-NORD-4
+          - OP-NORD-4-CE
+          - OP-NORD-5
+          - OP-NORD-CE-5
+          - OP-NORD-CE4-LITE
+          - OP-OPEN
+          - OP-PAD-2-MT6991
+          - OP-PAD-2-PRO
+          - OP-PAD-2-SM8650
+          - OP-PAD-3-MT6897
+          - OP-PAD-3-SM8750
+          - OP-PAD-GO-2
+          - OP-PAD-LITE
+          - OP-PAD-MT6983
+          - OP-PAD-PRO
+          - OP10pro
+          - OP10r
+          - OP10t
+          - OP11
+          - OP11r
+          - OP12
+          - OP12r
+          - OP13
+          - OP13-CPH
+          - OP13-PJZ
+          - OP13S
+          - OP13T
+          - OP13r
+          - OP15
+          - OP15r
+          - OP15T
+          - OP-TURBO-6
+          - OP-TURBO-6V
+        default: All
+      android_version_filter:
+        description: 'Select the Android Version to build'
+        required: true
+        type: choice
+        options:
+          - All
+          - oos14
+          - oos15
+          - oos16
+          - oos14+oos15
+          - oos15+oos16
+          - oos14+oos16
+        default: All
+      kernel_version_filter:
+        description: 'Select the Kernel Version to build'
+        required: true
+        type: choice
+        options:
+          - All
           - android12-5.10
-        default: A14+15+16
+          - android13-5.15
+          - android14-6.1
+          - android15-6.6
+          - android16-6.12
+        default: All
       ksu_options:
         description: 'Enter KernelSU build json'
         required: true
         type: string
-        default: '[{"type":"ksun","hash":"dev"}]'
+        default: '[{"type":"ksun","hash":"f1b64f440f3cd170e2a86d7816bef26fbdee1caa"}]'
+      enable_wireguard:
+        description: '🛂 Global Master Switch: Enable WireGuard for all models'
+        required: true
+        type: boolean
+        default: false
+      enable_battery_opt:
+        description: '🔋 Global Master Switch: Enable Battery Optimization for all models'
+        required: true
+        type: boolean
+        default: false
+      enable_ntsync:
+        description: '🕹️ Global Master Switch: Enable NTSync for all models'
+        required: true
+        type: boolean
+        default: false
       optimize_level:
         description: "Compiler optimization level"
         required: true
@@ -49,35 +128,53 @@ on:
         required: false
         type: boolean
         default: false
-      mirror_toolchains:
-        description: 'Do you want to sync toolchains before build? [99% runs not required]'
-        required: false
+      make_release:
+        description: 'Create a GitHub Release'
         type: boolean
         default: false
       build_timestamp:
         description: 'Custom kernel build timestamp for uname -a (e.g. "Tue Feb 10 10:01:02 UTC 2026"). Leave empty for current time.'
         type: string
         default: ''
+      workflow_mode:
+        description: 'Select the workflow mode'
+        required: true
+        type: choice
+        options:
+          - 'Build & Release'
+          - 'Release Only'
+        default: 'Build & Release'
+      run_id_to_release:
+        description: 'Run ID to pull artifacts from (Only for "Release Only" mode)'
+        required: false
+        type: string
+        default: ''
+      custom_changelog:
+        description: 'Custom changelog for the release (Optional, overrides auto-gen)'
+        required: false
+        type: string
+        default: ''
       android12-5_10_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android12-5.10'
         type: string
-        default: ''
+        default: '9a8a553adba2b91aaa137be5ffad4dab0aea7eb0'      
       android13-5_15_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android13-5.15'
         type: string
-        default: ''
+        default: 'cb79a8b35e2387a98645024f432b8d0c7cab6625'      
       android14-6_1_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android14-6.1'
         type: string
-        default: ''
+        default: '7bc8989feacd1ed262103aaf77ca120d02043e2a'
       android15-6_6_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android15-6.6'
         type: string
-        default: ''
+        default: '8c6da8443a622c8e5dfdea621d306b5143b40d01'
       android16-6_12_susfs_branch_or_commit:
         description: 'Enter SusFS Branch or commit hash for android16-6.12'
         type: string
-        default: ''
+        default: '7b3e90160043ffe844f3db34d8c7c57ff4789f53'
+
 
 jobs:
   set-op-model:
@@ -135,40 +232,60 @@ jobs:
           echo "]" >> matrix.json
           
           jq_filter="."
-          
-          case "$input" in
-            A14+15+16)
-              ;;
-            A15+16)
-              jq_filter="map(select(.os_version == \"A15\" or .os_version == \"A16\"))"
-              ;;
-            A14+15)
-              jq_filter="map(select(.os_version == \"A14\" or .os_version == \"A15\"))"
-              ;;
-            A16)
-              jq_filter="map(select(.os_version == \"A16\"))"
-              ;;
-            A15)
-              jq_filter="map(select(.os_version == \"A15\"))"
-              ;;
-            A14)
-              jq_filter="map(select(.os_version == \"A14\"))"
-              ;;
-            android*-*.*)
-              # Extract android version and kernel version
-              IFS='-' read -r av kv <<< "$input"
-              
-              # Build android*-* only for A15 and A16
-              jq_filter="map(select(.os_version == \"A15\" or .os_version == \"A16\")) | map(select(.android_version == \"$av\" and .kernel_version == \"$kv\"))"
-              
-              echo "ℹ️  Android-Kernel filter applied: $av-$kv"
-              echo "   Restricted to: A15 and A16 only"
-              ;;
-            *)
-              echo "::warning::Unknown input '$input'. Using empty filter."
-              jq_filter="map(select(false))"
-              ;;
-          esac
+            
+            case "$input" in
+              All)
+                ;;
+              *)
+                echo "ℹ️  Device-specific filter applied: $input"
+                jq_filter="map(select(.model == \"$input\"))"
+                ;;
+            esac
+            
+            android_input="${{ github.event.inputs.android_version_filter }}"
+            android_jq_filter=""
+            
+            case "$android_input" in
+              "All")
+                # No additional filtering needed
+                ;;
+              "oos14" | "A14")
+                android_jq_filter=" | map(select(.os_version == \"A14\"))"
+                ;;
+              "oos15" | "A15")
+                android_jq_filter=" | map(select(.os_version == \"A15\"))"
+                ;;
+              "oos16" | "A16")
+                android_jq_filter=" | map(select(.os_version == \"A16\"))"
+                ;;
+              "oos14+oos15" | "oos15+oos14")
+                android_jq_filter=" | map(select(.os_version == \"A14\" or .os_version == \"A15\"))"
+                ;;
+              "oos15+oos16" | "oos16+oos15")
+                android_jq_filter=" | map(select(.os_version == \"A15\" or .os_version == \"A16\"))"
+                ;;
+              "oos14+oos16" | "oos16+oos14")
+                android_jq_filter=" | map(select(.os_version == \"A14\" or .os_version == \"A16\"))"
+                ;;
+            esac
+            
+            kernel_input="${{ github.event.inputs.kernel_version_filter }}"
+            kernel_jq_filter=""
+            
+            case "$kernel_input" in
+              "All")
+                # No additional filtering needed
+                ;;
+              *)
+                # Format is like android14-6.1
+                # We need to split by dash
+                IFS='-' read -r av kv <<< "$kernel_input"
+                kernel_jq_filter=" | map(select(.android_version == \"$av\" and .kernel_version == \"$kv\"))"
+                ;;
+            esac
+            
+            jq_filter="${jq_filter}${android_jq_filter}${kernel_jq_filter}"
+            echo "Final jq filter: $jq_filter"
           
           filtered=$(jq -c "$jq_filter" matrix.json)
           count=$(jq 'length' <<<"$filtered")
@@ -696,6 +813,9 @@ jobs:
           build_timestamp: ${{ inputs.build_timestamp }}
           clean: ${{ inputs.clean_build }}
           debug: ${{ inputs.debug }}
+          enable_wireguard: ${{ inputs.enable_wireguard }}
+          enable_battery_opt: ${{ inputs.enable_battery_opt }}
+          enable_ntsync: ${{ inputs.enable_ntsync }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📊 Build statistics
