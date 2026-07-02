@@ -2050,6 +2050,41 @@ runs:
         fi
         
         cp "$IMAGE_PATH" "$AK3_FOLDER/Image"
+
+        # Re-apply SakFi Branding (Banner and Flash Output)
+        if [ -f "${GITHUB_WORKSPACE}/.github/workflows/custom_banner.txt" ]; then
+          echo "✅ Injecting custom SakFi cinematic banner..."
+          BANNER_FILE="${GITHUB_WORKSPACE}/.github/workflows/custom_banner.txt"
+          
+          cd "$AK3_FOLDER"
+          rm -f custom_banner.sh
+          
+          # Remove original ui_print lines from anykernel.sh
+          sed -i '/^[[:space:]]*ui_print/d' anykernel.sh
+          
+          # Update kernel.string
+          sed -i 's/kernel.string=.*/kernel.string=OnePlus Kernels by SakFi/g' anykernel.sh
+          
+          # Remove default AnyKernel3 banner from core script to prevent duplicate banners
+          if [ -f tools/ak3-core.sh ]; then
+            sed -i '/ui_print "$kernel_string"/d' tools/ak3-core.sh
+            sed -i '/ui_print "AnyKernel3 by osm0sis/d' tools/ak3-core.sh
+          fi
+          
+          # Parse ASCII Banner: wrap plain text in ui_print, leave sleep/ui_print alone
+          awk '/\[ASCII_BANNER_START\]/{flag=1; next} /\[ASCII_BANNER_END\]/{flag=0; next} flag {
+            if ($0 ~ /^sleep/ || $0 ~ /^ui_print/) { print $0 }
+            else { gsub(/"/, "\\"", $0); print "ui_print \"" $0 "\"" }
+          }' "$BANNER_FILE" > custom_banner.sh
+          
+          # Parse UI Print Section: append exactly as written
+          awk '/\[UI_PRINT_START\]/{flag=1; next} /\[UI_PRINT_END\]/{flag=0; next} flag' "$BANNER_FILE" >> custom_banner.sh
+          
+          # Inject custom_banner.sh content directly after the first remaining executable line in anykernel.sh
+          sed -i '/^kernel\.string=/ r custom_banner.sh' anykernel.sh
+          rm custom_banner.sh
+          cd - > /dev/null
+        fi
         
         mv "${ARTIFACTS_FOLDER}/${OP_MODEL}_${OP_OS_VERSION}.txt" "$AK3_FOLDER/"
         cd "$AK3_FOLDER"
@@ -2065,9 +2100,9 @@ runs:
         
         ZIP_MODEL=$(echo "$OP_MODEL" | sed 's/-[0-9]\+\.[0-9]\+\.[0-9]\+$//')
         if [ "${{ env.OP_SUSFS }}" = true ]; then
-          ZIP_NAME="AK3_${ZIP_MODEL}_${OP_OS_VERSION}_${KERNEL_FULL_VER}_${{ inputs.ksu_type }}_${KSUVER:-unknown}_SuSFS_${SUSVER:-unknown}.zip"
+          ZIP_NAME="SKF_${ZIP_MODEL}_${OP_OS_VERSION}_${KERNEL_FULL_VER}_${{ inputs.ksu_type }}_${KSUVER:-unknown}_SuSFS_${SUSVER:-unknown}.zip"
         else
-          ZIP_NAME="AK3_${ZIP_MODEL}_${OP_OS_VERSION}_${KERNEL_FULL_VER}_${{ inputs.ksu_type }}_${KSUVER:-unknown}.zip"
+          ZIP_NAME="SKF_${ZIP_MODEL}_${OP_OS_VERSION}_${KERNEL_FULL_VER}_${{ inputs.ksu_type }}_${KSUVER:-unknown}.zip"
         fi
         mkdir -p "$ARTIFACTS_FOLDER"
         
