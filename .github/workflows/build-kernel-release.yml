@@ -1065,20 +1065,13 @@ jobs:
           git tag $NEW_TAG
           git push origin $NEW_TAG
 
-      - name: 📥 Download Artifacts (Current Run)
-        if: inputs.workflow_mode != 'Release Only'
+      - name: 📥 Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./downloaded-artifacts
           merge-multiple: true
-
-      - name: 📥 Download Artifacts (Release Only)
-        if: inputs.workflow_mode == 'Release Only'
-        uses: actions/download-artifact@v4
-        with:
-          path: ./downloaded-artifacts
-          merge-multiple: true
-          run-id: ${{ inputs.run_id_to_release }}
+          skip-decompress: true
+          run-id: ${{ inputs.workflow_mode == 'Release Only' && inputs.run_id_to_release || github.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📋 List Downloaded Artifacts
