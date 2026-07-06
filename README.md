@@ -78,7 +78,7 @@ This repository provides a fully automated GitHub Actions workflow that:
 | 🛡️ **SUSFS v2.2.0+** | Advanced root hiding with Magic Mount support (Auto-synced) |
 | 🔋 **Battery Optimization** | Modular suite: Wakelock hard-caps, Schedutil tuning, MGLRU, and Log Silencing |
 | 🛠️ **Manual Hooks** | `scope_min_manual_hooks_v1.4` for better app compatibility |
-| 🖧 **BBR** | Improved TCP congestion control |
+| 🖧 **BBRv3** | Next-gen TCP congestion control |
 | 🛡️ **BBG** | LSM-based Baseband Guard security |
 | 🌐 **TTL Target Support** | Network packet manipulation |
 | 🧱 **IP Set Support** | Advanced firewall capabilities |

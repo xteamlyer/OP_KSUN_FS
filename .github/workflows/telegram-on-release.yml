@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Send message to Telegram
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -53,8 +56,93 @@ jobs:
             STATUS="Manual Notification"
           fi
 
-          # Extract only the commit changelog under 'This Release'
-          CLEAN_CHANGELOG=$(echo "$REL_BODY" | awk '/^### This Release/ {flag=1; next} /^### Previous Releases/ || /^---/ || /^## / {flag=0} flag && /^- /' | head -n 15)
+          # ── Extract SUSFS version from release tag (e.g. v2.2.0-r1 → v2.2.0) ──
+          SUSFS_VER=$(echo "$REL_TAG" | sed 's/-r[0-9]*$//')
+          if [ -z "$SUSFS_VER" ]; then SUSFS_VER="latest"; fi
+
+          # ── Extract Features from the release body ──
+          # The release body has a "✨ Features & Capabilities" table with rows like:
+          # | 🔐 **KernelSU-Next** | Next-generation kernel-level root solution |
+          FEATURES_RAW=$(echo "$REL_BODY" | awk '
+            /^## ✨ Features/ { flag=1; next }
+            flag && /^\|:---/ { next }
+            flag && /^\| .+\|/ {
+              # Strip leading/trailing pipes and whitespace
+              gsub(/^\| */, ""); gsub(/ *\| *$/, "")
+              # Split by pipe separator
+              split($0, parts, / *\| */)
+              emoji_name = parts[1]
+              desc = parts[2]
+              # Remove bold markers
+              gsub(/\*\*/, "", emoji_name)
+              # Remove backtick markers
+              gsub(/`/, "", emoji_name)
+              printf "- %s: %s\n", emoji_name, desc
+            }
+            flag && /^---/ { flag=0 }
+            flag && /^$/ { next }
+            flag && /^</ { flag=0 }
+          ')
+
+          if [ -n "$FEATURES_RAW" ]; then
+            # Group features into categories for a clean Telegram message
+            VARIANTS=""
+            NETWORK=""
+            ADVANCED=""
+            SECURITY=""
+            OPTIMIZATION=""
+
+            while IFS= read -r line; do
+              case "$line" in
+                *KernelSU*|*SUSFS*)
+                  feat_name=$(echo "$line" | sed 's/^- [^ ]* //' | cut -d: -f1)
+                  VARIANTS="${VARIANTS}    - ${feat_name}\n" ;;
+                *BBR*|*WireGuard*|*TTL*|*IP.Set*)
+                  feat_name=$(echo "$line" | sed 's/^- [^ ]* //' | cut -d: -f1)
+                  NETWORK="${NETWORK}, ${feat_name}" ;;
+                *Droidspaces*|*NTSync*|*HMBIRD*|*TMPFS*)
+                  feat_name=$(echo "$line" | sed 's/^- [^ ]* //' | cut -d: -f1)
+                  ADVANCED="${ADVANCED}, ${feat_name}" ;;
+                *BBG*|*Manual.Hooks*|*Unicode*)
+                  feat_name=$(echo "$line" | sed 's/^- [^ ]* //' | cut -d: -f1)
+                  SECURITY="${SECURITY}, ${feat_name}" ;;
+                *LTO*|*Optimization*|*Battery*)
+                  feat_name=$(echo "$line" | sed 's/^- [^ ]* //' | cut -d: -f1)
+                  OPTIMIZATION="${OPTIMIZATION}, ${feat_name}" ;;
+              esac
+            done <<< "$FEATURES_RAW"
+
+            # Clean up leading commas/spaces
+            NETWORK=$(echo "$NETWORK" | sed 's/^, //')
+            ADVANCED=$(echo "$ADVANCED" | sed 's/^, //')
+            SECURITY=$(echo "$SECURITY" | sed 's/^, //')
+            OPTIMIZATION=$(echo "$OPTIMIZATION" | sed 's/^, //')
+
+            FEATURES_BLOCK="Features:
+          - Variants:
+          $(echo -e "$VARIANTS" | sed '/^$/d')  - Optimized for performance and battery life (${OPTIMIZATION:-LTO, Battery, Optimization})
+          - Network features (${NETWORK:-BBRv3, WireGuard, IP Set, TTL})
+          - Advanced features (${ADVANCED:-Droidspaces, NTSync, HMBIRD SCX})
+          - Enhanced security (${SECURITY:-BBG, Manual Hooks, Unicode Bypass Fix})"
+          else
+            # Fallback: hardcoded features if extraction fails
+            FEATURES_BLOCK="Features:
+          - Variants:
+              - KernelSU-Next
+              - SUSFS (${SUSFS_VER})
+          - Optimized for performance and battery life (LTO, Memory, I/O)
+          - Network features (TCP BBRv3, WireGuard, IP Set, TTL)
+          - Advanced features (Droidspaces, NTSync, HMBIRD SCX)
+          - Enhanced security (BBG, Manual Hooks v1.4)"
+          fi
+
+          # ── Changelog: read from changelog.txt (committed in repo) ──
+          if [ -f "changelog.txt" ] && [ -s "changelog.txt" ]; then
+            CLEAN_CHANGELOG=$(cat changelog.txt | head -n 15)
+          else
+            # Fallback: extract from release body under 'This Release'
+            CLEAN_CHANGELOG=$(echo "$REL_BODY" | awk '/^### This Release/ {flag=1; next} /^### Previous Releases/ || /^---/ || /^## / {flag=0} flag && /^- /' | head -n 15)
+          fi
           if [ -z "$CLEAN_CHANGELOG" ]; then CLEAN_CHANGELOG="- Minor updates and under the hood improvements"; fi
           if [[ ${#CLEAN_CHANGELOG} -gt 1500 ]]; then CLEAN_CHANGELOG="${CLEAN_CHANGELOG:0:1500}..."; fi
 
@@ -67,14 +155,7 @@ jobs:
           Title: $REL_NAME
           Device: Any supported OnePlus device (Check GitHub for your device)
 
-          Features:
-          - Variants:
-            - KernelSU-Next
-            - SUSFS (v2.1.0)
-          - Optimized for performance and battery life (LTO, Memory, I/O)
-          - Network features (TCP BBR, WireGuard, IP Set, TTL)
-          - Advanced features (Droidspaces, NTSync, HMBIRD SCX)
-          - Enhanced security (BBG, Manual Hooks v1.4)
+          $FEATURES_BLOCK
 
           Changelog:
           $CLEAN_CHANGELOG</code></pre>

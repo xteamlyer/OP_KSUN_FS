@@ -1196,7 +1196,19 @@ jobs:
               IFS=$'\t' read -r hmbird susfs bbr bbg ttl ip_set unicode ds ntsync <<< "$feature_flags"
               [[ "$hmbird" == "true" ]] && features+=("🐦 HMBIRD")
               [[ "$susfs" == "true" ]] && features+=("ඞ SusFS")
-              [[ "$bbr" == "true" ]] && features+=("🚀 BBR")
+              if [[ "$bbr" == "true" ]]; then
+                # Show BBRv3 when bbr3 flag is true, otherwise BBR
+                bbr3_flag=$(echo "$JSON_BUILD_DATA" | jq -r --arg MODEL "$model" --arg ORIG_MODEL "$possible_orig_model" --arg OS "$os_ver" '
+                  ([ .[] | select(.model == $ORIG_MODEL and .os_version == $OS) ][0]) //
+                  ([ .[] | select(.model == $MODEL      and .os_version == $OS) ][0]) |
+                  .bbr3 // false
+                ' | head -n 1)
+                if [[ "$bbr3_flag" == "true" ]]; then
+                  features+=("🚀 BBRv3")
+                else
+                  features+=("🚀 BBR")
+                fi
+              fi
               [[ "$bbg" == "true" ]] && features+=("🛡️ BBG")
               [[ "$ttl" == "true" ]] && features+=("🌐 TTL")
               [[ "$ip_set" == "true" ]] && features+=("🧱 IP_SET")
@@ -1251,7 +1263,7 @@ jobs:
           | 💻 **Droidspaces** | SYSVIPC support for multi-instance app environments |
           | 🔃 **NTSync** | Fast wine synchronization primitives for emulation |
           | 🛠️ **Manual Hooks** | \`scope_min_manual_hooks_v1.4\` for better app compatibility |
-          | 🖧 **BBR** | Improved TCP congestion control |
+          | 🖧 **BBRv3** | Next-gen TCP congestion control |
           | 🛡️ **BBG** | LSM-based Baseband Guard security |
           | 🌐 **TTL Target Support** | Network packet manipulation |
           | 🧱 **IP Set Support** | Advanced firewall capabilities |
