@@ -325,7 +325,7 @@ jobs:
             KSU_REPO_OWNER="KernelSU-Next"
             KSU_REPO_NAME="KernelSU-Next"
           else
-            KSU_REPO_OWNER="tiann"
+            KSU_REPO_OWNER="xteamlyer"
             KSU_REPO_NAME="KernelSU"
           fi
           
@@ -555,7 +555,7 @@ jobs:
             KSU_REPO_OWNER="KernelSU-Next"
             KSU_REPO_NAME="KernelSU-Next"
           else
-            KSU_REPO_OWNER="tiann"
+            KSU_REPO_OWNER="xteamlyer"
             KSU_REPO_NAME="KernelSU"
           fi
           
